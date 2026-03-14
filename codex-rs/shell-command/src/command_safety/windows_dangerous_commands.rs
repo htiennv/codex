@@ -1,8 +1,8 @@
 use std::path::Path;
 
-use once_cell::sync::Lazy;
 use regex::Regex;
 use shlex::split as shlex_split;
+use std::sync::LazyLock;
 use url::Url;
 
 pub fn is_dangerous_command_windows(command: &[String]) -> bool {
@@ -312,8 +312,9 @@ fn args_have_url(args: &[String]) -> bool {
 fn looks_like_url(token: &str) -> bool {
     // Strip common PowerShell punctuation around inline URLs (quotes, parens, trailing semicolons).
     // Capture the middle token after trimming leading quotes/parens/whitespace and trailing semicolons/closing parens.
-    static RE: Lazy<Option<Regex>> =
-        Lazy::new(|| Regex::new(r#"^[ "'\(\s]*([^\s"'\);]+)[\s;\)]*$"#).ok());
+    static RE: LazyLock<Option<Regex>> =
+        LazyLock::new(|| Regex::new(r#"^[ "'\(\s]*([^\s"'\);]+)[\s;\)]*$"#).ok());
+
     // If the token embeds a URL alongside other text (e.g., Start-Process('https://...'))
     // as a single shlex token, grab the substring starting at the first URL prefix.
     let urlish = token

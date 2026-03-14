@@ -23,7 +23,7 @@ use crate::token_data::TokenData;
 use codex_app_server_protocol::AuthMode;
 use codex_keyring_store::DefaultKeyringStore;
 use codex_keyring_store::KeyringStore;
-use once_cell::sync::Lazy;
+use std::sync::LazyLock;
 
 /// Determine where Codex should store CLI auth credentials.
 #[derive(Debug, Default, Copy, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
@@ -266,8 +266,8 @@ impl AuthStorageBackend for AutoAuthStorage {
 }
 
 // A global in-memory store for mapping codex_home -> AuthDotJson.
-static EPHEMERAL_AUTH_STORE: Lazy<Mutex<HashMap<String, AuthDotJson>>> =
-    Lazy::new(|| Mutex::new(HashMap::new()));
+static EPHEMERAL_AUTH_STORE: LazyLock<Mutex<HashMap<String, AuthDotJson>>> =
+    LazyLock::new(|| Mutex::new(HashMap::new()));
 
 #[derive(Clone, Debug)]
 struct EphemeralAuthStorage {
